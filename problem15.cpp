@@ -1,6 +1,3 @@
-#include <iostream>
-#include <vector>
-
 #include "threads/mingw.thread.h"
 
 using namespace std;
@@ -38,18 +35,20 @@ void path(int row, int col) {
 }
 
 int main() {
-    Move adding;
-    adding.col = 0;
-    adding.row = 0;
-    pipeline.push_back(adding);
-    while(!pipeline.empty()) {
-        Move t = pipeline.back();
-        pipeline.pop_back();
-        thread(path, t.row, t.col);
-        //path(t.row, t.col);
-    }
+    for(size = 2; size < 10; size++) {
+        Move adding;
+        adding.col = 0;
+        adding.row = 0;
+        pipeline.push_back(adding);
+        while (!pipeline.empty()) {
+            Move t = pipeline.back();
+            pipeline.pop_back();
+            thread(path, t.row, t.col);
+            //path(t.row, t.col);
+        }
 
-    cout << "Problem 15 solution is " << counter;
+        cout << "Problem 15 solution is " << counter;
+    }
 
     return 0;
 }
