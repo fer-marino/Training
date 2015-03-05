@@ -1,51 +1,65 @@
 #include <iostream>
-#include <list>
 #include <ctime>
-#include <thread>
+#include <windows.h>
 
 using namespace std;
 
-unsigned long long triangleSequence(unsigned int n) {
-    unsigned long long out = 0;
-    for(int i = 1; i <= n; i++)
-        out += i;
-    return out;
-}
+struct threadParams{
+    int param1;
+    int param2;
+};
 
-list<unsigned long long> factorize(unsigned long long value) {
-    list<unsigned long long> out;
+static DWORD WINAPI compute(void* threadParams){
+    struct threadParams* params = (struct threadParams*)threadParams;
 
-    for(unsigned long long i = value; i >= 1; i--)
-        if(value % i == 0) // fattore
-            out.push_back(i);
+    unsigned long long num = params->param1;
 
-    //out.sort();
-    return out;
+    for(unsigned long long i = num; i < num+500; i++) {
+
+        // triangle of i
+        unsigned int count = 0;
+        unsigned long long num = 0;
+        for (int j = 1; j <= i; j++)
+            num += j;
+
+        // count divisors of num
+        count = 2;
+        for (unsigned long long j = num / 2 + 1; j > 1; j--)
+            if (num % j == 0) // factor
+                count++;
+
+        if (count >= 500)
+            cout << "solution found " << i;
+    }
 }
 
 int main() {
-    unsigned int i = 9000;
-    const int num_threads = 5;
-    list<unsigned long long> fact;
+
+
+    unsigned int i = 10000;
     clock_t begin = clock();
-    int maxSize = 0;
-    while(fact.size() < 5000) {
-        i++;
-        unsigned long long num = triangleSequence(i);
-        //cout << num << ' ';
-        fact = factorize(num);
-        if(fact.size() > maxSize)
-            maxSize = fact.size();
-        //for(list<unsigned long long>::const_iterator it = fact.begin(); it != fact.end(); ++it)
-          //  cout << *it << ' ';
-        //cout << '\n';
-        if(i % 500 == 0) {
+    unsigned int maxSize = 0;
+    while(i < 13000) {
+        DWORD threadDescriptor;
+        struct threadParams params1 = {1, 2};
+
+        CreateThread(
+                NULL,                   /* default security attributes.   */
+                0,                      /* use default stack size.        */
+                compute,          /* thread function name.          */
+                (void*)&params1,        /* argument to thread function.   */
+                0,                      /* use default creation flags.    */
+                &threadDescriptor);     /* returns the thread identifier. */
+
+        i+=500;
+
+        if(i % 100 == 0) {
             clock_t end = clock();
-            cout << i << ' ' << (500 / (double(end - begin) / CLOCKS_PER_SEC)) << " eval per sec | max size " << maxSize <<'\n';
+            cout << i << ' ' << (100 / (double(end - begin) / CLOCKS_PER_SEC)) << " eval per sec | max size " << maxSize <<'\n';
             begin = clock();
         }
     }
 
-    cout << "Problem 12 solution is " << (i);
+    cout << "Problem 12 solution is " << (i) << " with " << maxSize;
     return 0;
 }
